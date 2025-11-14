@@ -7,4 +7,4 @@ public enum QueryType {
     TRANSACTION_SUM_COMPARE,
     ACTIVE_USER_OF
 
-}
+}.
