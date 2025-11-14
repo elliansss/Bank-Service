@@ -24,7 +24,58 @@ public class Rule {
     @Convert(converter = ArgumentListConverter.class)
     private List<String> arguments=new ArrayList<>();
 
-    @ManyToMany
-    @JoinColumn(name="recommendation")
+    @ManyToOne
+    @JoinColumn(name="recommendation_id")
     private Recommendation recommendation;
+
+    public Rule() {
+    }
+
+    public Rule(UUID id, Recommendation recommendation, List<String> arguments, Boolean negate, QueryType queryType) {
+        this.id = id;
+        this.recommendation = recommendation;
+        this.arguments = arguments;
+        this.negate = negate;
+        this.queryType = queryType;
+    }
+
+    public UUID getId() {
+        return id;
+    }
+
+    public void setId(UUID id) {
+        this.id = id;
+    }
+
+    public Recommendation getRecommendation() {
+        return recommendation;
+    }
+
+    public void setRecommendation(Recommendation recommendation) {
+        this.recommendation = recommendation;
+    }
+
+    public List<String> getArguments() {
+        return arguments;
+    }
+
+    public void setArguments(List<String> arguments) {
+        this.arguments = arguments;
+    }
+
+    public Boolean getNegate() {
+        return negate;
+    }
+
+    public void setNegate(Boolean negate) {
+        this.negate = negate;
+    }
+
+    public QueryType getQueryType() {
+        return queryType;
+    }
+
+    public void setQueryType(QueryType queryType) {
+        this.queryType = queryType;
+    }
 }

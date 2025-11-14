@@ -2,6 +2,7 @@ package org.skypro.bank.impl;
 
 import org.skypro.bank.dto.RecommendationDTO;
 import org.skypro.bank.repository.RecommendationsRepository;
+import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.stereotype.Repository;
 
@@ -12,7 +13,7 @@ public class RecommendationsRepositoryJDBC implements RecommendationsRepository 
 
     private final JdbcTemplate jdbcTemplate;
 
-    public RecommendationsRepositoryJDBC(JdbcTemplate jdbcTemplate) {
+    public RecommendationsRepositoryJDBC(@Qualifier("recommendationsJdbcTemplate") JdbcTemplate jdbcTemplate) {
         this.jdbcTemplate = jdbcTemplate;
     }
 

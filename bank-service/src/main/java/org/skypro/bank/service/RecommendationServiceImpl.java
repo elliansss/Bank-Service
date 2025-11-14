@@ -1,8 +1,9 @@
 package org.skypro.bank.service;
 
 import org.skypro.bank.dto.RecommendationDTO;
-import org.skypro.bank.dto.RecommendationResponse;
-import org.skypro.bank.rules.RecommendationRuleSet;
+import org.skypro.bank.dto.RecommendationRequest;
+import org.skypro.bank.model.Recommendation;
+import org.skypro.bank.repository.MyRecommendationRepository;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
@@ -13,20 +14,40 @@ import java.util.stream.Collectors;
 @Service
 public class RecommendationServiceImpl implements RecommendationService {
 
-    private final List<RecommendationRuleSet> ruleSets;
+    private final MyRecommendationRepository myRecommendationRepository;
 
-    public RecommendationServiceImpl(List<RecommendationRuleSet> ruleSets) {
-        this.ruleSets = ruleSets;
+    public RecommendationServiceImpl(MyRecommendationRepository myRecommendationRepository) {
+        this.myRecommendationRepository = myRecommendationRepository;
     }
 
     @Override
-    public RecommendationResponse getRecommendations(UUID userId) {
-        List<RecommendationDTO> recommendations = ruleSets.stream()
-                .map(rule -> rule.apply(userId))
-                .filter(java.util.Optional::isPresent)
-                .map(java.util.Optional::get)
+    public List<RecommendationDTO> getAllRecommendations() {
+        return myRecommendationRepository.findAll().stream()
+                .map(this::convertToDto)
                 .collect(Collectors.toList());
+    }
 
-        return new RecommendationResponse(userId, recommendations);
+    @Override
+    public Optional<RecommendationDTO> getRecommendation(UUID id) {
+        return myRecommendationRepository.findById(id)
+                .map(this::convertToDto);
+    }
+
+    @Override
+    public RecommendationDTO createRecommendation(RecommendationRequest request) {
+        Recommendation recommendation = new Recommendation();
+        recommendation.setId(UUID.randomUUID()); // генерируем новый UUID
+        recommendation.setName(request.getName());
+        recommendation.setText(request.getDescription());
+        return convertToDto(myRecommendationRepository.save(recommendation));
+    }
+
+    @Override
+    public void deleteRecommendation(UUID id) {
+        myRecommendationRepository.deleteById(id);
+    }
+
+    private RecommendationDTO convertToDto(Recommendation entity) {
+        return new RecommendationDTO(entity.getId(), entity.getName(), entity.getText());
     }
 }

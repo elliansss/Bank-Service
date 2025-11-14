@@ -9,8 +9,9 @@ public class RecommendationResponse {
     private UUID userId;
     private List<RecommendationDTO> recommendations;
 
-    public RecommendationResponse() {}
+    public RecommendationResponse() {
 
+    }
     public RecommendationResponse(UUID userId, List<RecommendationDTO> recommendations) {
         this.userId = userId;
         this.recommendations = recommendations;
