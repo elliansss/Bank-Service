@@ -64,9 +64,9 @@ public class RecommendationServiceImpl implements RecommendationService {
         myRecommendationRepository.save(recommendation);
 
         // Затем сохраняем каждое правило отдельно
-        for(Rule rule : rules) {
-            rulesRepository.save(rule);
-        }
+
+            rulesRepository.saveAll(rules);
+
 
         return convertToDto(recommendation);
     }
