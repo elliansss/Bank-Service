@@ -42,7 +42,7 @@ public class RecommendationServiceImpl implements RecommendationService {
 
    @Override
     public RecommendationDTO createRecommendation(RecommendationRequest request) {
-       final Recommendation recommendation = new Recommendation();
+     final  Recommendation recommendation = new Recommendation();
         recommendation.setId(UUID.randomUUID());                   // Генерируем новый UUID
         recommendation.setName(request.getProduct_name());        // Устанавливаем название продукта
         recommendation.setText(request.getProduct_text());        // Устанавливаем описание продукта
@@ -61,7 +61,7 @@ public class RecommendationServiceImpl implements RecommendationService {
                 .collect(Collectors.toList());
 
         // Сохраняем сначала саму рекомендацию
-        recommendation = myRecommendationRepository.save(recommendation);
+        myRecommendationRepository.save(recommendation);
 
         // Затем сохраняем каждое правило отдельно
         for(Rule rule : rules) {
