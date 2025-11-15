@@ -40,9 +40,9 @@ public class RecommendationServiceImpl implements RecommendationService {
                 .map(this::convertToDto);
     }
 
-    @Override
+   @Override
     public RecommendationDTO createRecommendation(RecommendationRequest request) {
-        Recommendation recommendation = new Recommendation();
+       final Recommendation recommendation = new Recommendation();
         recommendation.setId(UUID.randomUUID());                   // Генерируем новый UUID
         recommendation.setName(request.getProduct_name());        // Устанавливаем название продукта
         recommendation.setText(request.getProduct_text());        // Устанавливаем описание продукта
