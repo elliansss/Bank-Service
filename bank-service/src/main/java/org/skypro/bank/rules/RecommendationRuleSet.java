@@ -6,5 +6,12 @@ import java.util.Optional;
 import java.util.UUID;
 
 public interface RecommendationRuleSet {
-   public Optional<RecommendationDTO> apply(UUID userId);
+   Optional<RecommendationDTO> apply(UUID userId);
+
+   /**
+    * Возвращает идентификатор правила для статистики
+    */
+   default String getRuleId() {
+      return this.getClass().getSimpleName();
+   }
 }
