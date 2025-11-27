@@ -17,18 +17,6 @@ public class RecommendationDTO {
         this.text = text;
     }
 
-    public void setName(String name) {
-        this.name = name;
-    }
-
-    public void setText(String text) {
-        this.text = text;
-    }
-
-    public void setId(UUID id) {
-        this.id = id;
-    }
-
     public UUID getId() {
         return id;
     }

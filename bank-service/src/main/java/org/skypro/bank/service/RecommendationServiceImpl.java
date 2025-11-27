@@ -1,13 +1,9 @@
 package org.skypro.bank.service;
 
 import org.skypro.bank.dto.RecommendationDTO;
-import org.skypro.bank.dto.RecommendationRequest;
-import org.skypro.bank.dto.RuleDto;
-import org.skypro.bank.model.Recommendation;
-import org.skypro.bank.model.Rule;
-import org.skypro.bank.model.QueryType;
-import org.skypro.bank.repository.MyRecommendationRepository;
-import org.skypro.bank.repository.RulesRepository;
+import org.skypro.bank.dto.RecommendationResponse;
+import org.skypro.bank.rules.RecommendationRuleSet;
+import org.skypro.bank.repository.RuleStatisticRepository;
 import org.springframework.stereotype.Service;
 
 import java.util.Collection;
@@ -19,18 +15,30 @@ import java.util.stream.Collectors;
 @Service
 public class RecommendationServiceImpl implements RecommendationService {
 
-    private final MyRecommendationRepository myRecommendationRepository;
-    private final RulesRepository rulesRepository;
+    private final List<RecommendationRuleSet> ruleSets;
+    private final RuleStatisticRepository ruleStatisticRepository;
 
-    public RecommendationServiceImpl(MyRecommendationRepository myRecommendationRepository, RulesRepository rulesRepository) {
-        this.myRecommendationRepository = myRecommendationRepository;
-        this.rulesRepository = rulesRepository;
+    public RecommendationServiceImpl(List<RecommendationRuleSet> ruleSets,
+                                     RuleStatisticRepository ruleStatisticRepository) {
+        this.ruleSets = ruleSets;
+        this.ruleStatisticRepository = ruleStatisticRepository;
     }
 
     @Override
-    public List<RecommendationDTO> getAllRecommendations() {
-        return myRecommendationRepository.findAll().stream()
-                .map(this::convertToDto)
+    public RecommendationResponse getRecommendations(UUID userId) {
+        List<RecommendationDTO> recommendations = ruleSets.stream()
+                .map(rule -> {
+                    Optional<RecommendationDTO> recommendation = rule.apply(userId);
+                    if (recommendation.isPresent()) {
+                        String ruleId = getRuleId(rule);
+                        if (ruleId != null) {
+                            ruleStatisticRepository.incrementCounter(ruleId);
+                        }
+                    }
+                    return recommendation;
+                })
+                .filter(Optional::isPresent)
+                .map(Optional::get)
                 .collect(Collectors.toList());
     }
 
@@ -78,5 +86,9 @@ public class RecommendationServiceImpl implements RecommendationService {
 
     private RecommendationDTO convertToDto(Recommendation entity) {
         return new RecommendationDTO(entity.getId(), entity.getName(), entity.getText());
+    }
+
+    private String getRuleId(RecommendationRuleSet rule) {
+        return rule.getClass().getSimpleName();
     }
 }

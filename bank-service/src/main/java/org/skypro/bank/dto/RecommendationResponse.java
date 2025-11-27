@@ -16,4 +16,12 @@ public class RecommendationResponse {
         this.userId = userId;
         this.recommendations = recommendations;
     }
+
+    public UUID getUserId() {
+        return userId;
+    }
+
+    public List<RecommendationDTO> getRecommendations() {
+        return recommendations;
+    }
 }
