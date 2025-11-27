@@ -4,6 +4,7 @@ import org.skypro.bank.dto.RecommendationDTO;
 import org.skypro.bank.repository.RecommendationsRepository;
 import org.springframework.stereotype.Component;
 
+import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
 
@@ -28,13 +29,13 @@ public class Invest500 implements RecommendationRuleSet {
     }
 
     @Override
-    public Optional<RecommendationDTO> apply(UUID userId) {
+    public List<RecommendationDTO> apply(UUID userId) {
         Integer debitCount = repository.countProductsByTypeAndUserId(userId, "DEBIT");
         Integer investCount = repository.countProductsByTypeAndUserId(userId, "INVEST");
         Integer sum = repository.getTransactionalSumByTypeAndUserIdAndOperationType(userId, "SAVING", "DEPOSIT");
 
         if (debitCount > 0 && investCount == 0 && sum > 1000) {
-            return Optional.of(
+            return List.of(
                     new RecommendationDTO(
                             PRODUCT_ID,
                             NAME,
@@ -42,6 +43,6 @@ public class Invest500 implements RecommendationRuleSet {
                     )
             );
         }
-        return Optional.empty();
+        return List.of();
     }
 }

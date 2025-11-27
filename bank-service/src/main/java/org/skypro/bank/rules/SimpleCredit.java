@@ -4,6 +4,7 @@ import org.skypro.bank.dto.RecommendationDTO;
 import org.skypro.bank.repository.RecommendationsRepository;
 import org.springframework.stereotype.Component;
 
+import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
 
@@ -28,7 +29,7 @@ public class SimpleCredit implements RecommendationRuleSet {
     }
 
     @Override
-    public Optional<RecommendationDTO> apply(UUID userId) {
+    public List<RecommendationDTO> apply(UUID userId) {
         Integer creditCount = repository.countProductsByTypeAndUserId(userId, "CREDIT");
         Integer debitDeposits = repository.getTransactionalSumByTypeAndUserIdAndOperationType(userId, "DEBIT", "DEPOSIT");
         Integer debitExpenses = repository.getTransactionalSumByTypeAndUserIdAndOperationType(userId, "DEBIT", "WITHDRAWAL");
@@ -38,7 +39,7 @@ public class SimpleCredit implements RecommendationRuleSet {
         boolean expensesOver100k = debitExpenses > 100000;
 
         if (notUsesCredit && depositsGreaterThanExpenses && expensesOver100k) {
-            return Optional.of(
+            return List.of(
                     new RecommendationDTO(
                             PRODUCT_ID,
                             NAME,
@@ -46,6 +47,6 @@ public class SimpleCredit implements RecommendationRuleSet {
                     )
             );
         }
-        return Optional.empty();
+        return List.of();
     }
 }
