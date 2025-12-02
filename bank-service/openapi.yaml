@@ -1,0 +1,452 @@
+openapi: 3.0.0
+info:
+  title: Bank Recommendation Service API
+  description: |
+    API для банковской рекомендательной системы.
+    Предоставляет функциональность для получения рекомендаций,
+    управления динамическими правилами и статистики.
+  version: 1.0.0
+  contact:
+    name: Bank Development Team
+    email: dev@bank-star.ru
+  license:
+    name: MIT
+    url: https://opensource.org/licenses/MIT
+
+servers:
+  - url: http://localhost:8080
+    description: Development server
+  - url: https://api.bank-star.ru/recommendation
+    description: Production server
+
+tags:
+  - name: Recommendations
+    description: Операции с рекомендациями
+  - name: Rule Management
+    description: Управление динамическими правилами
+  - name: Statistics
+    description: Статистика и мониторинг
+  - name: Management
+    description: Управление сервисом
+
+paths:
+  /api/recommendations/{userId}:
+    get:
+      tags:
+        - Recommendations
+      summary: Получить рекомендации для пользователя
+      description: Возвращает список рекомендаций для указанного пользователя
+      operationId: getRecommendations
+      parameters:
+        - name: userId
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+          description: UUID пользователя
+      responses:
+        '200':
+          description: Успешный ответ
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/RecommendationResponse'
+        '400':
+          description: Неверный UUID
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '404':
+          description: Пользователь не найден
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+
+  /api/manager/v1/recommendation-rules:
+    get:
+      tags:
+        - Rule Management
+      summary: Получить список всех правил
+      description: Возвращает список всех динамических правил рекомендаций
+      operationId: getAllRules
+      responses:
+        '200':
+          description: Успешный ответ
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/Rule'
+
+    post:
+      tags:
+        - Rule Management
+      summary: Создать новое правило
+      description: Создает новое динамическое правило рекомендаций
+      operationId: createRule
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/RuleCreateRequest'
+      responses:
+        '201':
+          description: Правило успешно создано
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Rule'
+        '400':
+          description: Неверные данные запроса
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+
+  /api/manager/v1/recommendation-rules/{ruleId}:
+    get:
+      tags:
+        - Rule Management
+      summary: Получить правило по ID
+      description: Возвращает правило по его идентификатору
+      operationId: getRuleById
+      parameters:
+        - name: ruleId
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+      responses:
+        '200':
+          description: Успешный ответ
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Rule'
+        '404':
+          description: Правило не найдено
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+
+    put:
+      tags:
+        - Rule Management
+      summary: Обновить правило
+      description: Обновляет существующее правило
+      operationId: updateRule
+      parameters:
+        - name: ruleId
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/RuleUpdateRequest'
+      responses:
+        '200':
+          description: Правило успешно обновлено
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Rule'
+        '400':
+          description: Неверные данные запроса
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '404':
+          description: Правило не найдено
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+
+    delete:
+      tags:
+        - Rule Management
+      summary: Удалить правило
+      description: Удаляет правило по его идентификатору
+      operationId: deleteRule
+      parameters:
+        - name: ruleId
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+      responses:
+        '204':
+          description: Правило успешно удалено
+        '404':
+          description: Правило не найдено
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+
+  /rule/stats:
+    get:
+      tags:
+        - Statistics
+      summary: Получить статистику срабатываний
+      description: Возвращает статистику срабатываний динамических правил
+      operationId: getStatistics
+      responses:
+        '200':
+          description: Успешный ответ
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/StatisticsResponse'
+
+  /management/clear-caches:
+    post:
+      tags:
+        - Management
+      summary: Сбросить кэши
+      description: Сбрасывает все закешированные результаты
+      operationId: clearCaches
+      responses:
+        '200':
+          description: Кэши успешно сброшены
+
+  /management/info:
+    get:
+      tags:
+        - Management
+      summary: Получить информацию о сервисе
+      description: Возвращает информацию о сервисе (название, версия и т.д.)
+      operationId: getServiceInfo
+      responses:
+        '200':
+          description: Успешный ответ
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ServiceInfo'
+
+components:
+  schemas:
+    Recommendation:
+      type: object
+      required:
+        - id
+        - name
+        - text
+      properties:
+        id:
+          type: string
+          format: uuid
+          example: "147f6a0f-3b91-413b-ab99-87f081d60d5a"
+        name:
+          type: string
+          example: "Invest 500"
+        text:
+          type: string
+          example: "Откройте свой путь к успеху с индивидуальным инвестиционным счетом..."
+
+    RecommendationResponse:
+      type: object
+      required:
+        - userId
+        - recommendations
+        - timestamp
+      properties:
+        userId:
+          type: string
+          format: uuid
+          example: "cd515076-5d8a-44be-930e-8d4fcb79f42d"
+        recommendations:
+          type: array
+          items:
+            $ref: '#/components/schemas/Recommendation'
+        timestamp:
+          type: string
+          format: date-time
+          example: "2024-01-15T10:30:00Z"
+
+    Rule:
+      type: object
+      required:
+        - id
+        - name
+        - text
+        - sqlQuery
+        - isActive
+        - createdAt
+        - updatedAt
+      properties:
+        id:
+          type: string
+          format: uuid
+          example: "550e8400-e29b-41d4-a716-446655440000"
+        name:
+          type: string
+          example: "Инвестиционный продукт для опытных"
+        description:
+          type: string
+          example: "Продукт для опытных инвесторов"
+        text:
+          type: string
+          example: "Текст, который будет отображаться пользователю в рекомендациях"
+        sqlQuery:
+          type: string
+          example: "SELECT user_id FROM transactions WHERE amount > 1000"
+        isActive:
+          type: boolean
+          example: true
+        createdAt:
+          type: string
+          format: date-time
+          example: "2024-01-10T14:30:00Z"
+        updatedAt:
+          type: string
+          format: date-time
+          example: "2024-01-12T09:15:00Z"
+
+    RuleCreateRequest:
+      type: object
+      required:
+        - name
+        - text
+        - sqlQuery
+      properties:
+        name:
+          type: string
+          example: "Новое правило"
+        description:
+          type: string
+          example: "Описание нового правила"
+        text:
+          type: string
+          example: "Текст рекомендации"
+        sqlQuery:
+          type: string
+          example: "SELECT user_id FROM transactions WHERE amount > 1000"
+
+    RuleUpdateRequest:
+      type: object
+      required:
+        - name
+        - text
+        - sqlQuery
+        - isActive
+      properties:
+        name:
+          type: string
+          example: "Обновленное название"
+        description:
+          type: string
+          example: "Обновленное описание"
+        text:
+          type: string
+          example: "Обновленный текст рекомендации"
+        sqlQuery:
+          type: string
+          example: "SELECT user_id FROM transactions WHERE amount > 5000"
+        isActive:
+          type: boolean
+          example: false
+
+    StatisticsResponse:
+      type: object
+      required:
+        - stats
+        - totalRecommendations
+        - generatedAt
+      properties:
+        stats:
+          type: array
+          items:
+            type: object
+            required:
+              - ruleId
+              - count
+            properties:
+              ruleId:
+                type: string
+                format: uuid
+                example: "550e8400-e29b-41d4-a716-446655440000"
+              count:
+                type: integer
+                minimum: 0
+                example: 42
+        totalRecommendations:
+          type: integer
+          minimum: 0
+          example: 57
+        generatedAt:
+          type: string
+          format: date-time
+          example: "2024-01-15T10:30:00Z"
+
+    ServiceInfo:
+      type: object
+      required:
+        - name
+        - version
+        - status
+      properties:
+        name:
+          type: string
+          example: "bank-recommendation-service"
+        version:
+          type: string
+          example: "1.0.0"
+        buildTime:
+          type: string
+          format: date-time
+          example: "2024-01-15T10:00:00Z"
+        environment:
+          type: string
+          example: "development"
+        status:
+          type: string
+          enum: [UP, DOWN, MAINTENANCE]
+          example: "UP"
+
+    Error:
+      type: object
+      required:
+        - timestamp
+        - status
+        - error
+        - message
+        - path
+      properties:
+        timestamp:
+          type: string
+          format: date-time
+          example: "2024-01-15T10:30:00Z"
+        status:
+          type: integer
+          example: 400
+        error:
+          type: string
+          example: "Bad Request"
+        message:
+          type: string
+          example: "Invalid UUID format"
+        path:
+          type: string
+          example: "/api/recommendations/invalid-uuid"
+
+securitySchemes:
+  BearerAuth:
+    type: http
+    scheme: bearer
+    bearerFormat: JWT
